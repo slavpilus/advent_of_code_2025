@@ -30,6 +30,35 @@ defmodule AOC.Day02 do
   end
 
   def part2(input) do
-    IO.inspect(input)
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.flat_map(fn line -> String.split(line, ",") end)
+    |> Enum.map(fn range -> get_range(range) end)
+    |> Enum.map(fn range -> find_incorrect2(range) end)
+    |> Enum.sum()
+  end
+
+  defp find_incorrect2({start, stop}) do
+    start..stop
+    |> Enum.filter(fn n -> is_invalid?(Integer.to_string(n)) end)
+    |> Enum.sum()
+  end
+
+  defp is_invalid?(s) do
+    len = String.length(s)
+
+    if len < 2 do
+      false
+    else
+      Enum.any?(1..(len - 1)//1, fn chunk_size ->
+        rem(len, chunk_size) == 0 and
+          s
+          |> String.codepoints()
+          |> Enum.chunk_every(chunk_size)
+          |> Enum.map(&Enum.join/1)
+          |> Enum.uniq()
+          |> length() == 1
+      end)
+    end
   end
 end
