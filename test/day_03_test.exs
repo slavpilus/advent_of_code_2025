@@ -9,6 +9,11 @@ defmodule AOC.Day03Test do
   end
 
   test "day03part2" do
-    IO.puts("pass")
+    assert AOC.Day03.part2("987654321111111") == 987_654_321_111
+    assert AOC.Day03.part2("811111111111119") == 811_111_111_119
+    assert AOC.Day03.part2("987654321111111
+811111111111119
+234234234234278
+818181911112111") == 3_121_910_778_619
   end
 end
