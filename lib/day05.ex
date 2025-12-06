@@ -27,6 +27,37 @@ defmodule AOC.Day05 do
   end
 
   def part2(input) do
-    IO.puts(input)
+    ranges =
+      input
+      |> String.split("\n", trim: true)
+      |> Enum.filter(fn row -> String.contains?(row, "-") end)
+      |> Enum.map(fn row ->
+        {from, to} = extract(row)
+        from..to
+      end)
+
+    merge_ranges(ranges)
+    |> Enum.map(fn range ->
+      range.last - range.first + 1
+    end)
+      |> Enum.sum()
+  end
+
+  def merge_ranges(ranges) do
+    ranges
+    |> Enum.sort_by(&Enum.min/1)
+    |> merge()
+  end
+
+  defp merge([]), do: []
+  defp merge([single]), do: [single]
+
+  defp merge([first, second | rest]) do
+    if Enum.max(first) >= Enum.min(second) - 1 do
+      merged = Enum.min(first)..max(Enum.max(first), Enum.max(second))
+      merge([merged | rest])
+    else
+      [first | merge([second | rest])]
+    end
   end
 end
