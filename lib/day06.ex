@@ -10,18 +10,14 @@ defmodule AOC.Day06 do
     n4i = to_integer_list_index(n4)
     opi = to_index(op)
 
-    out =
-      for i <- 0..(map_size(n1i) - 1) do
-        if Map.get(opi, i) == "*" do
-          Map.get(n1i, i) * Map.get(n2i, i) * Map.get(n3i, i) * Map.get(n4i, i)
-        else
-          Map.get(n1i, i) + Map.get(n2i, i) + Map.get(n3i, i) + Map.get(n4i, i)
-        end
+    for i <- 0..(map_size(n1i) - 1) do
+      if Map.get(opi, i) == "*" do
+        Map.get(n1i, i) * Map.get(n2i, i) * Map.get(n3i, i) * Map.get(n4i, i)
+      else
+        Map.get(n1i, i) + Map.get(n2i, i) + Map.get(n3i, i) + Map.get(n4i, i)
       end
-      |> Enum.sum()
-
-    IO.inspect(out, label: "out")
-    out
+    end
+    |> Enum.sum()
   end
 
   defp to_index(col) do
