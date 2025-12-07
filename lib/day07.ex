@@ -49,6 +49,47 @@ defmodule AOC.Day07 do
   end
 
   def part2(input) do
-    IO.inspect(input)
+    grid =
+      input
+      |> String.split("\n", trim: true)
+      |> Enum.with_index()
+      |> Enum.flat_map(fn {row, y} ->
+        row
+        |> String.codepoints()
+        |> Enum.with_index()
+        |> Enum.map(fn {char, x} -> {{x, y}, char} end)
+      end)
+      |> Map.new()
+
+    max_y = grid |> Map.keys() |> Enum.map(fn {_, y} -> y end) |> Enum.max()
+    start = get_starting_point(grid)
+    {count, _cache} = get_quantum_splitters(start, grid, max_y, %{})
+    count
+  end
+
+  def get_quantum_splitters({x, y}, grid, max_y, cache) do
+    case Map.get(cache, {x, y}) do
+      nil ->
+        found =
+          Enum.find(y..max_y, fn i ->
+            Map.get(grid, {x, i}) == "^"
+          end)
+
+        {result, cache} =
+          case found do
+            nil ->
+              {1, cache}
+
+            i ->
+              {left, cache} = get_quantum_splitters({x - 1, i + 1}, grid, max_y, cache)
+              {right, cache} = get_quantum_splitters({x + 1, i + 1}, grid, max_y, cache)
+              {left + right, cache}
+          end
+
+        {result, Map.put(cache, {x, y}, result)}
+
+      cached ->
+        {cached, cache}
+    end
   end
 end
