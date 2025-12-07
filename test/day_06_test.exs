@@ -10,6 +10,10 @@ defmodule AOC.Day06Test do
   end
 
   test "day06part2" do
-    IO.puts("pass")
+    assert AOC.Day06.part2("
+123 328  51 64 
+ 45 64  387 23 
+  6 98  215 314
+*   +   *   +  ") == 3_263_827
   end
 end

@@ -38,6 +38,42 @@ defmodule AOC.Day06 do
   end
 
   def part2(input) do
-    IO.inspect(input, label: "input")
+    pivoted =
+      input
+      |> String.split("\n", trim: true)
+      |> Enum.drop(-1)
+      |> Enum.map(&String.codepoints/1)
+      |> Enum.zip_with(& &1)
+      |> Enum.map(&Enum.join/1)
+      |> Enum.chunk_by(fn x -> String.trim(x) == "" end)
+      |> Enum.reject(fn chunk -> String.trim(hd(chunk)) == "" end)
+      |> Enum.with_index()
+      |> Map.new(fn {chunk, i} -> {i, chunk} end)
+
+    ops =
+      input
+      |> String.split("\n", trim: true)
+      |> List.last()
+      |> String.split(" ", trim: true)
+      |> Enum.with_index()
+      |> Map.new(fn {val, i} -> {i, val} end)
+
+    for i <- 0..(map_size(pivoted) - 1) do
+      op =
+        Map.get(ops, i)
+
+      if op == "*" do
+        Map.get(pivoted, i)
+        |> Enum.map(&String.trim/1)
+        |> Enum.map(&String.to_integer/1)
+        |> Enum.product()
+      else
+        Map.get(pivoted, i)
+        |> Enum.map(&String.trim/1)
+        |> Enum.map(&String.to_integer/1)
+        |> Enum.sum()
+      end
+    end
+    |> Enum.sum()
   end
 end
