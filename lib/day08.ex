@@ -78,6 +78,75 @@ defmodule AOC.Day08 do
   end
 
   def part2(input) do
-    IO.inspect(input)
+    boxes =
+      input
+      |> String.split("\n", trim: true)
+      |> Enum.with_index(1)
+      |> Enum.map(fn {row, idx} ->
+        [x, y, z] = String.split(row, ",") |> Enum.map(&String.to_integer/1)
+        {x, y, z, idx}
+      end)
+
+    distances =
+      for a <- boxes, b <- boxes, a < b do
+        {coords(a), coords(b), get_disstance(a, b) |> elem(0)}
+      end
+      |> Enum.sort_by(&elem(&1, 2))
+
+    connect_all(boxes, MapSet.new(), distances, nil)
+
+    {{a, _, _}, {b, _, _}} = connect_all(boxes, MapSet.new(), distances, nil)
+
+    a * b
+  end
+
+  defp connect_all(boxes, connected, distances, last_pair) do
+    circuit_ids = boxes |> Enum.map(&elem(&1, 3)) |> Enum.uniq()
+
+    if length(circuit_ids) == 1 do
+      last_pair
+    else
+      {updated_boxes, connected, new_last_pair} =
+        get_next_pair_with_last(boxes, connected, distances)
+
+      last_pair = new_last_pair || last_pair
+      connect_all(updated_boxes, connected, distances, last_pair)
+    end
+  end
+
+  defp get_next_pair_with_last(boxes, connected, distances) do
+    case Enum.find(distances, fn {c1, c2, _dist} ->
+           not MapSet.member?(connected, {c1, c2})
+         end) do
+      nil ->
+        {boxes, connected, nil}
+
+      {c1, c2, _dist} ->
+        connected = MapSet.put(connected, {c1, c2})
+
+        id1 = get_circuit_id(boxes, c1)
+        id2 = get_circuit_id(boxes, c2)
+
+        {updated_boxes, merged_pair} =
+          if id1 != id2 do
+            {smaller, larger} = if id1 < id2, do: {id1, id2}, else: {id2, id1}
+
+            updated =
+              Enum.map(boxes, fn {x, y, z, id} ->
+                if id == smaller, do: {x, y, z, larger}, else: {x, y, z, id}
+              end)
+
+            {updated, {c1, c2}}
+          else
+            {boxes, nil}
+          end
+
+        {updated_boxes, connected, merged_pair}
+    end
+  end
+
+  defp get_circuit_id(boxes, {x, y, z}) do
+    {_, _, _, id} = Enum.find(boxes, fn {bx, by, bz, _} -> {bx, by, bz} == {x, y, z} end)
+    id
   end
 end
